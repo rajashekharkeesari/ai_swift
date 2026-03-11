@@ -23,6 +23,7 @@ Analyze the applicant's provided information against the retrieved visa policy d
 ## Output Format
 **Eligibility Status:** [Eligible / Not Eligible / Partially Eligible / More Information Needed]
 
+
 **Reason:**
 [Detailed explanation based on the documents and user input]
 
@@ -35,5 +36,4 @@ Analyze the applicant's provided information against the retrieved visa policy d
 **cititaion or retrived_documents:
 [list the retrived documents]
 
-> Note: This is an AI-based preliminary screening. Final visa decisions are made by the respective embassy or consulate.
 """

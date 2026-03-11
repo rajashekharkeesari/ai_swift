@@ -5,6 +5,9 @@ __pycache__/
 
 swift
 Data
+models
+
+logs
 .env
 # C extensions
 *.so
@@ -38,6 +41,10 @@ MANIFEST
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
+
+
+models
+models--sentence-transformers--all-MiniLM-L6-v2
 
 # Unit test / coverage reports
 htmlcov/

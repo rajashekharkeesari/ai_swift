@@ -1,34 +1,32 @@
-#file 
-jq
-
-
 # Core app framework
 streamlit>=1.30.0
 
 # LangChain ecosystem
-langchain>=0.1.0
-langchain-community>=0.0.30
-langchain_openai
-langchain_qroq
+langchain>=0.3.0
+langchain-community>=0.3.0
+langchain-core>=0.3.0
+langchain-openai>=0.2.0
+langchain-groq>=0.2.0
 
 # Embeddings
-langchain-huggingface
+langchain-huggingface>=0.1.0
 sentence-transformers>=2.2.2
 torch>=2.0.0
 
 # Vector database
 faiss-cpu>=1.7.4
 
-# Utilities (commonly needed with LangChain)
+# Utilities
 numpy>=1.23.0
 scipy>=1.10.0
 tqdm>=4.65.0
 pydantic>=2.0.0
 
-# Optional but useful
+# Environment
 python-dotenv>=1.0.0
 
-#for reading files
+# File reading
 pypdf
 unstructured
 pandas
+jq
