@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # SwiftVisa-AI-Based-Visa-Eligibility-Screening-Agent-Batch13
 
 __Requirements__
@@ -140,3 +141,6 @@ Rules:
 
 
 __step_by_step_approach_(milestone_1)__
+=======
+# ai_swift
+>>>>>>> 10c928577953ace69a4c743da51ec06e0121edb9
