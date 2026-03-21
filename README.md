@@ -1,146 +1,233 @@
-<<<<<<< HEAD
-# SwiftVisa-AI-Based-Visa-Eligibility-Screening-Agent-Batch13
+# 🛂 SwiftVisa — AI-Powered Visa Eligibility Screening Agent
 
-__Requirements__
-langchain
-FAISS
-python
-sentence-transformers
-streamlit
+SwiftVisa is an intelligent RAG (Retrieval-Augmented Generation) based visa eligibility assistant. It analyzes a user's profile against real visa policy documents and determines eligibility with detailed explanations, next steps, and citations — powered by **Groq (Llama 3.3)**, **FAISS**, and **Cross-Encoder Reranking**.
 
-__Data_resources__
+---
 
-🇺🇸 United States (USA)
-U.S. Citizenship and Immigration Services (USCIS)
-https://www.uscis.gov
+## 🧠 How It Works
 
-🇬🇧 United Kingdom (UK)
-https://www.gov.uk/browse/visas-immigration
+```
+User Query
+    │
+    ▼
+FAISS Vector Store (similarity search)
+    │
+    ▼
+Cross-Encoder Reranker (ms-marco-MiniLM-L-6-v2)
+    │
+    ▼
+Prompt Formatter (user input + top reranked doc)
+    │
+    ▼
+Groq LLM (Llama-3.3-70b-versatile)
+    │
+    ▼
+Eligibility Response + Citations + Next Steps
+    │
+    ▼
+Query Logger (logs/queries.json)
+```
 
-🇨🇦 Canada**
-https://www.canada.ca/en/immigration-refugees-citizenship.html
+---
 
-🇦🇺 Australia
-https://immi.homeaffairs.gov.au
+## ✨ Features
 
-🇨🇳 China
-https://www.visaforchina.cn
+- 🔍 **Semantic Search** — FAISS vector store with HuggingFace `all-MiniLM-L6-v2` embeddings
+- 🏆 **Cross-Encoder Reranking** — `ms-marco-MiniLM-L-6-v2` reranks retrieved docs for highest relevance
+- 🤖 **LLM Reasoning** — Groq's `llama-3.3-70b-versatile` for fast, accurate eligibility analysis
+- 📋 **Structured Output** — Eligibility status, reasons, next steps, missing info, and citations
+- 📝 **Query Logging** — Logs last 20 queries with timestamps to `logs/queries.json`
+- 🌐 **React Frontend** — Login, Signup, and Home pages built with React + Tailwind CSS
+- ⚡ **FastAPI Backend** — Lightweight REST API served with Uvicorn
+- 🔒 **Offline Models** — Embedding and reranker models run fully locally (no internet needed at runtime)
 
-🇯🇵 Japan
-https://www.isa.go.jp
+---
 
-🇮🇪 Ireland
-https://www.irishimmigration.ie
+## 🗂️ Project Structure
 
-🇩🇪 Germany
-https://www.make-it-in-germany.com
+```
+ai_swift/
+│
+├── app.py                        # FastAPI entry point
+│
+├── src/
+│   ├── __init__.py
+│   ├── Dataloader.py             # Loads & formats visa JSON data into LangChain Documents
+│   ├── Embeddings.py             # FAISS vector store creation & loading (HuggingFace embeddings)
+│   ├── retriver.py               # VisaRetriever class — similarity search over FAISS
+│   ├── reranker.py               # Cross-Encoder reranking with ms-marco-MiniLM-L-6-v2
+│   ├── prompt.py                 # SwiftVisa system prompt template
+│   ├── prompt_formater.py        # Combines retrieval + reranking + prompt formatting
+│   ├── llm_model.py              # Groq LLM (Llama-3.3-70b-versatile) setup
+│   └── logging.py                # JSON-based query/response logger
+│
+├── Data/
+│   ├── visaType.json             # Visa policy dataset (source of truth)
+│   └── vectorestore/            # Saved FAISS index (auto-generated)
+│
+├── models/
+│   ├── sentence-transformers/    # Cached HuggingFace embedding model
+│   └── cross-encoder-ms-marco-MiniLM-L-6-v2/   # Cached reranker model
+│
+├── logs/
+│   └── queries.json             # Auto-generated query logs (last 20 entries)
+│
+└── frontend/
+    ├── Home.jsx                 # Home page component
+    ├── Login.jsx                # Login form (email, phone, password)
+    └── Signup.jsx               # Signup form (email, phone, password)
+```
 
-🇮🇳 India
-https://indianvisaonline.gov.in
+---
 
-🇳🇿 New Zealand
-https://www.immigration.govt.nz
+## 🛠️ Getting Started
 
+### Prerequisites
 
-__visa_types__
-In this project i have selected four types of visa that are mostly used for travellers.
-1* student visa
-2* work visa
-3* tourist visa
-4* health visa
+- Python 3.10+
+- Node.js 18+ (for frontend)
+- [Groq API Key](https://console.groq.com/)
 
+### 1. Clone the Repository
 
-__Data_set_format__
-* I have used json format to store the extracted attributes from the official resources
+```bash
+git clone https://github.com/rajashekharkeesari/ai_swift.git
+cd ai_swift
+```
 
-{
-        "country": "",
-        "visa_type": " ",
-        "age_min": ,
-        "age_max": "",
-        "education_requirement": "",
-        "admission_letter": "",
-        "job_offer": "",
-        "employer_sponsorship": "",
-        "english_proficiency": "",
-        "accepted_exams": [
-            
-        ],
-        "financial_proof": "",
-        "work_allowed": "",
-        "post_study_work": "",
-        "salary_threshold": "",
-        "points_system": "",
-        "language_requirement": "",
-        "medical_exam": "",
-        "insurance_required": "",
-        "ties_to_home_country": "",
-        "visa_duration": "",
-        "pr_path": "",
-        "remarks": "",
-        "officical_resource": ""
-    },
+### 2. Create Virtual Environment
 
+```bash
+python -m venv venv
+# Windows
+venv\Scripts\activate
+# macOS/Linux
+source venv/bin/activate
+```
 
+### 3. Install Python Dependencies
 
-__prompt__
-"""
-You are an immigration data extraction assistant.
+```bash
+pip install -r requirements.txt
+```
 
-Your task is to extract structured visa eligibility information for the following:
+### 4. Configure Environment Variables
 
-Country: {COUNTRY_NAME}
-Visa Type: {VISA_TYPE}  (Example: Work Visa, Student Visa, Tourist Visa, Health/Medical Visa)
+Create a `.env` file in the root directory:
 
-Instructions:
-1. Extract ONLY officially stated eligibility and requirement information.
-2. If a requirement is not mentioned, return "Not Required" or "Not Specified".
-3. Do NOT guess or assume missing data.
-4. Output must be valid JSON.
-5. Do not include explanations outside JSON.
-6. Use exact field names provided below.
-7. If multiple subcategories exist (e.g., different work visa streams), summarize general eligibility or specify the main category.
+```env
+GROQ_API_KEY=your_groq_api_key_here
+```
 
-Output Format:
+### 5. Download Models (first time only)
 
-{
-    "country": "",
-    "visa_type": "",
-    "age_min": "",
-    "age_max": "",
-    "education_requirement": "",
-    "admission_letter": "",
-    "job_offer": "",
-    "employer_sponsorship": "",
-    "english_proficiency": "",
-    "accepted_exams": [],
-    "financial_proof": "",
-    "work_allowed": "",
-    "post_study_work": "",
-    "salary_threshold": "",
-    "points_system": "",
-    "language_requirement": "",
-    "medical_exam": "",
-    "insurance_required": "",
-    "ties_to_home_country": "",
-    "visa_duration": "",
-    "pr_path": "",
-    "remarks": "",
-    "official_resource": ""
-}
+```bash
+# Download and cache the cross-encoder reranker model
+python src/reranker.py
+```
 
-Rules:
-- accepted_exams must be an array.
-- If no exams required, return [].
-- If numeric values are available (salary, age, duration), include exact numbers.
-- official_resource must be a government website link only.
-- No markdown formatting.
-- No additional commentary.
-- Return JSON only.    """
+The HuggingFace embedding model (`all-MiniLM-L6-v2`) is downloaded automatically on first run and cached in the `models/` folder.
 
+### 6. Build the Vector Store (first time only)
 
+```bash
+python src/Dataloader.py
+```
 
-__step_by_step_approach_(milestone_1)__
-=======
-# ai_swift
->>>>>>> 10c928577953ace69a4c743da51ec06e0121edb9
+This loads `Data/visaType.json`, formats each visa entry, and saves the FAISS index to `Data/vectorestore/`.
+
+### 7. Run the Backend
+
+```bash
+python app.py
+```
+
+API available at `http://127.0.0.1:8000`  
+Swagger docs at `http://127.0.0.1:8000/docs`
+
+### 8. Run the Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+---
+
+## 🔁 RAG Pipeline Details
+
+### Step 1 — Data Loading (`Dataloader.py`)
+Reads `visaType.json` and formats each visa entry into structured `LangChain Document` objects with fields including country, visa type, age range, education, language requirements, financial proof, work permissions, PR path, and official resources.
+
+### Step 2 — Embeddings & Vector Store (`Embeddings.py`)
+Uses `sentence-transformers/all-MiniLM-L6-v2` (runs fully offline via cached models) to embed documents into FAISS for fast similarity search.
+
+### Step 3 — Retrieval (`retriver.py`)
+`VisaRetriever` performs top-k similarity search on the FAISS index based on the user's query.
+
+### Step 4 — Reranking (`reranker.py`)
+`CrossEncoder (ms-marco-MiniLM-L-6-v2)` reranks retrieved documents using query-document pair scoring. Scores are normalized with sigmoid and sorted in descending order for highest relevance.
+
+### Step 5 — Prompt Formatting (`prompt_formater.py`)
+Combines the user query and the top reranked document into the `SwiftVisa` prompt template using LangChain's `PromptTemplate`.
+
+### Step 6 — LLM Response (`llm_model.py`)
+Groq's `llama-3.3-70b-versatile` generates a structured eligibility response including status, reasons, next steps, missing information, and document citations.
+
+### Step 7 — Logging (`logging.py`)
+Every query, response, and retrieved documents are logged to `logs/queries.json`. Only the last 20 entries are retained.
+
+---
+
+## 📤 Example Output
+
+```
+Eligibility Status: Eligible
+
+Reason:
+The applicant meets the age requirement (22 years, within 18–35 range),
+holds a bachelor's degree satisfying the education requirement, and has
+a valid job offer with employer sponsorship.
+
+Recommended Next Steps:
+1. Obtain IELTS score of 6.0 or above
+2. Gather financial proof (bank statements for last 6 months)
+3. Apply via the official portal listed below
+
+Missing Information:
+- English proficiency test score not provided
+
+Citations / Retrieved Documents:
+- Country: Canada | Visa Type: Skilled Worker
+  Official Resource: https://www.canada.ca/immigration
+```
+
+---
+
+## 🧰 Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Backend | FastAPI, Uvicorn |
+| LLM | Groq — Llama-3.3-70b-versatile |
+| Embeddings | HuggingFace — all-MiniLM-L6-v2 |
+| Vector Store | FAISS (LangChain) |
+| Reranker | CrossEncoder — ms-marco-MiniLM-L-6-v2 |
+| RAG Framework | LangChain |
+| Frontend | React, React Router, Tailwind CSS |
+| Logging | JSON file-based logger |
+| Language | Python 3.12, JavaScript (JSX) |
+
+---
+
+## 📄 License
+
+This project is open source. Feel free to use and modify it.
+
+---
+
+## 👨‍💻 Author
+
+**Rajashekhar Keesari**  
+[GitHub](https://github.com/rajashekharkeesari)
