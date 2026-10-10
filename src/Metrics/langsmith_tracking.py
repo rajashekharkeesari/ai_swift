@@ -23,6 +23,8 @@ os.environ.setdefault("LANGSMITH_PROJECT", "swiftvisa")
 
 # USD per 1,000,000 tokens. Update as provider pricing changes.
 MODEL_PRICING = {
+    "openai/gpt-oss-120b": {"input": 0.15, "output": 0.60},
+    "openai/gpt-oss-20b": {"input": 0.10, "output": 0.50},
     "llama-3.3-70b-versatile": {"input": 0.59, "output": 0.79},
 }
 
