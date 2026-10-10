@@ -1,44 +1,42 @@
+"""HuggingFace embeddings and FAISS vector store management."""
+
 import os
-from langchain_community.vectorstores import FAISS
-from langchain_community.embeddings import HuggingFaceEmbeddings
 import warnings
-warnings.filterwarnings('ignore', category=DeprecationWarning)
+
 from dotenv import load_dotenv
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEmbeddings
+
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 load_dotenv()
-os.environ["HF_HUB_OFFLINE"] = "1"
-directory = os.getcwd()
-folder = "Data"
-filename = "vectorestore"
-vector_path = os.path.join(directory, folder, filename)
-cache_folder = os.path.join(os.getcwd(), "models")
+
+os.environ.setdefault("HF_HUB_OFFLINE", "1")
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+VECTOR_PATH = os.path.join(PROJECT_ROOT, "Data", "vectorestore")
+CACHE_FOLDER = os.path.join(PROJECT_ROOT, "models")
+
 embeddings = HuggingFaceEmbeddings(
     model_name="sentence-transformers/all-MiniLM-L6-v2",
-    cache_folder=cache_folder,
+    cache_folder=CACHE_FOLDER,
     model_kwargs={
         "device": "cpu",
-        "local_files_only": True 
-    }
+        "local_files_only": True,
+    },
 )
 
 
-
 def create_vector_store(documents):
-
-    index_file = os.path.join(vector_path, "index.faiss")
+    """Create a FAISS vector store from documents, or load it if it already exists."""
+    index_file = os.path.join(VECTOR_PATH, "index.faiss")
 
     if os.path.exists(index_file):
-        print("_____loading existing vectorstore_____")
-
-        vectorstore = FAISS.load_local(
-            vector_path,
+        return FAISS.load_local(
+            VECTOR_PATH,
             embeddings,
-            allow_dangerous_deserialization=True
+            allow_dangerous_deserialization=True,
         )
-        return vectorstore
-
-    print("_____creating vectorstore_____")
 
     vectorstore = FAISS.from_documents(documents, embeddings)
-    vectorstore.save_local(vector_path)
-
+    vectorstore.save_local(VECTOR_PATH)
     return vectorstore

@@ -33,7 +33,6 @@ Analyze the applicant's provided information against the retrieved visa policy d
 **Missing Information (if any):**
 [List any details needed to make a final decision]
 
-**cititaion or retrived_documents:
-[list the retrived documents]
-
+**Citations / Retrieved Documents:**
+[List the retrieved documents and their official resources]
 """

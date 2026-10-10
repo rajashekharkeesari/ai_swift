@@ -1,0 +1,50 @@
+[
+  {
+    "query": "I'm 24 with a bachelor's degree and want to study in Canada",
+    "expected_country": "Canada",
+    "expected_visa_type": "Study Permit",
+    "expected_keywords": ["Designated Learning Institution", "study permit", "proof of funds"]
+  },
+  {
+    "query": "I have a job offer from a German company and a university degree, can I work there?",
+    "expected_country": "Germany",
+    "expected_visa_type": "EU Blue Card (Work Visa)",
+    "expected_keywords": ["EU Blue Card", "salary threshold", "job offer"]
+  },
+  {
+    "query": "I want to work in India, I'm a skilled software professional with a job offer",
+    "expected_country": "India",
+    "expected_visa_type": "Employment Visa",
+    "expected_keywords": ["employment visa", "employer sponsorship", "job offer"]
+  },
+  {
+    "query": "I want to study a master's degree in Australia",
+    "expected_country": "Australia",
+    "expected_visa_type": "Student Visa (Subclass 500)",
+    "expected_keywords": ["Confirmation of Enrolment", "OSHC", "Genuine Student"]
+  },
+  {
+    "query": "I'd like a tourist visa to visit India for two weeks",
+    "expected_country": "India",
+    "expected_visa_type": "Tourist Visa / e-Tourist Visa",
+    "expected_keywords": ["tourist", "sufficient funds", "not allowed"]
+  },
+  {
+    "query": "I'm a software engineer with a US job offer and a bachelor's degree",
+    "expected_country": "United States",
+    "expected_visa_type": "H-1B Specialty Occupation Visa",
+    "expected_keywords": ["H-1B", "specialty", "employer"]
+  },
+  {
+    "query": "I want to study for a PhD in the United Kingdom",
+    "expected_country": "United Kingdom",
+    "expected_visa_type": "Student Visa",
+    "expected_keywords": ["Confirmation of Acceptance for Studies", "Immigration Health Surcharge", "Graduate Route"]
+  },
+  {
+    "query": "I'm a nurse wanting to migrate to Australia under skilled migration",
+    "expected_country": "Australia",
+    "expected_visa_type": "Skilled Independent Visa (Subclass 189)",
+    "expected_keywords": ["points", "skills assessment", "SkillSelect"]
+  }
+]

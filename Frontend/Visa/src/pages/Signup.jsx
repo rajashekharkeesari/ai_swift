@@ -1,17 +1,16 @@
 import React from 'react'
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
-const Signup = () => {
+import { Link, useNavigate } from 'react-router-dom'
+const Signup = ({ setLoggedin }) => {
     const [email, setEmail] = useState("")
     const [tel, setTel] = useState("")
     const [password, setPassword] = useState("")
+    const navigate = useNavigate()
 
     const handleSignup = (e) => {
         e.preventDefault()
-
-        console.log("Email:", email)
-        console.log("Phone:", tel)
-        console.log("Password:", password)
+        setLoggedin(true)
+        navigate("/")
     }
 
     return (
