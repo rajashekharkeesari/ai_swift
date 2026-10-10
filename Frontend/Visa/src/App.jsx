@@ -13,8 +13,8 @@ function App() {
 
       <Routes>
         <Route path="/" element={loggedin ? <Home /> : <Navigate to="/Login" />}></Route>
-        <Route path="/Login" element={<Login />}></Route>
-        <Route path="/Signup" element={<Signup />}></Route>
+        <Route path="/Login" element={<Login setLoggedin={setLoggedin} />}></Route>
+        <Route path="/Signup" element={<Signup setLoggedin={setLoggedin} />}></Route>
       </Routes>
 
     </>
