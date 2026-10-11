@@ -1,6 +1,21 @@
 # 🛂 SwiftVisa — AI-Powered Visa Eligibility Screening Agent
 
-SwiftVisa is an intelligent RAG (Retrieval-Augmented Generation) based visa eligibility assistant. It analyzes a user's profile against real visa policy documents and determines eligibility with detailed explanations, next steps, and citations — powered by **Groq (Llama 3.3)**, **FAISS**, and **Cross-Encoder Reranking**.
+SwiftVisa is a RAG (Retrieval-Augmented Generation) assistant that checks a user's profile against real visa policy data and returns an eligibility verdict with reasons, next steps, missing information, and citations.
+
+It combines **FAISS** semantic search, **Cross-Encoder reranking**, and **Groq (Llama-3.3-70b)** for generation, and uses **LangSmith** for tracing and for offline and online evaluation.
+
+---
+
+## ✨ Features
+
+- 🔍 **Semantic search**: FAISS vector store built with Hugging Face `all-MiniLM-L6-v2` embeddings
+- 🏆 **Cross-Encoder reranking**: `ms-marco-MiniLM-L-6-v2` re-scores retrieved documents; scores are sigmoid-normalized and sorted
+- 🤖 **LLM reasoning**: Groq `llama-3.3-70b-versatile` generates the eligibility analysis
+- 📋 **Structured output**: eligibility status, reasons, next steps, missing information, and citations
+- 📈 **LangSmith observability**: step-by-step traces plus offline evaluation and online monitoring
+- 📝 **Query logging**: last 20 queries with timestamps saved to `logs/queries.json`
+- ⚡ **FastAPI backend**: lightweight REST API served with Uvicorn
+- 🔒 **Offline models**: embedding and reranker models are cached locally, so no model downloads are needed at runtime
 
 ---
 
@@ -16,30 +31,17 @@ FAISS Vector Store (similarity search)
 Cross-Encoder Reranker (ms-marco-MiniLM-L-6-v2)
     │
     ▼
-Prompt Formatter (user input + top reranked doc)
+Prompt Formatter (user input + top reranked document)
     │
     ▼
-Groq LLM (Llama-3.3-70b-versatile)
+Groq LLM (llama-3.3-70b-versatile)
     │
     ▼
 Eligibility Response + Citations + Next Steps
     │
-    ▼
-Query Logger (logs/queries.json)
+    ├──► Query Logger (logs/queries.json)
+    └──► LangSmith (traces, evaluation, monitoring)
 ```
-
----
-
-## ✨ Features
-
-- 🔍 **Semantic Search** — FAISS vector store with HuggingFace `all-MiniLM-L6-v2` embeddings
-- 🏆 **Cross-Encoder Reranking** — `ms-marco-MiniLM-L-6-v2` reranks retrieved docs for highest relevance
-- 🤖 **LLM Reasoning** — Groq's `llama-3.3-70b-versatile` for fast, accurate eligibility analysis
-- 📋 **Structured Output** — Eligibility status, reasons, next steps, missing info, and citations
-- 📝 **Query Logging** — Logs last 20 queries with timestamps to `logs/queries.json`
-- 🌐 **React Frontend** — Login, Signup, and Home pages built with React + Tailwind CSS
-- ⚡ **FastAPI Backend** — Lightweight REST API served with Uvicorn
-- 🔒 **Offline Models** — Embedding and reranker models run fully locally (no internet needed at runtime)
 
 ---
 
@@ -47,35 +49,27 @@ Query Logger (logs/queries.json)
 
 ```
 ai_swift/
-│
-├── app.py                        # FastAPI entry point
+├── app.py                      # FastAPI entry point
+├── requirements.txt
+├── .env.example                # Environment variable template
 │
 ├── src/
-│   ├── __init__.py
-│   ├── Dataloader.py             # Loads & formats visa JSON data into LangChain Documents
-│   ├── Embeddings.py             # FAISS vector store creation & loading (HuggingFace embeddings)
-│   ├── retriver.py               # VisaRetriever class — similarity search over FAISS
-│   ├── reranker.py               # Cross-Encoder reranking with ms-marco-MiniLM-L-6-v2
-│   ├── prompt.py                 # SwiftVisa system prompt template
-│   ├── prompt_formater.py        # Combines retrieval + reranking + prompt formatting
-│   ├── llm_model.py              # Groq LLM (Llama-3.3-70b-versatile) setup
-│   └── logging.py                # JSON-based query/response logger
+│   ├── Dataloader.py           # Loads visa JSON and builds LangChain Documents
+│   ├── Embeddings.py           # FAISS vector store creation and loading
+│   ├── retriver.py             # VisaRetriever: similarity search over FAISS
+│   ├── reranker.py             # Cross-Encoder reranking
+│   ├── prompt.py               # SwiftVisa system prompt template
+│   ├── prompt_formater.py      # Retrieval + reranking + prompt formatting
+│   ├── llm_model.py            # Groq LLM setup
+│   └── logging.py              # JSON query/response logger
 │
 ├── Data/
-│   ├── visaType.json             # Visa policy dataset (source of truth)
-│   └── vectorestore/            # Saved FAISS index (auto-generated)
+│   ├── visaType.json           # Visa policy dataset (source of truth)
+│   └── vectorestore/           # Saved FAISS index (auto-generated)
 │
-├── models/
-│   ├── sentence-transformers/    # Cached HuggingFace embedding model
-│   └── cross-encoder-ms-marco-MiniLM-L-6-v2/   # Cached reranker model
-│
-├── logs/
-│   └── queries.json             # Auto-generated query logs (last 20 entries)
-│
-└── frontend/
-    ├── Home.jsx                 # Home page component
-    ├── Login.jsx                # Login form (email, phone, password)
-    └── Signup.jsx               # Signup form (email, phone, password)
+├── models/                     # Cached embedding and reranker models
+├── logs/queries.json           # Auto-generated query logs (last 20 entries)
+└── Frontend/Visa/              # React frontend (Login, Signup, Home)
 ```
 
 ---
@@ -85,50 +79,55 @@ ai_swift/
 ### Prerequisites
 
 - Python 3.10+
-- Node.js 18+ (for frontend)
-- [Groq API Key](https://console.groq.com/)
+- Node.js 18+ (only for the frontend)
+- A [Groq API key](https://console.groq.com/)
+- A [LangSmith API key](https://smith.langchain.com/) (optional, for tracing and evaluation)
 
-### 1. Clone the Repository
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/rajashekharkeesari/ai_swift.git
 cd ai_swift
 ```
 
-### 2. Create Virtual Environment
+### 2. Create a virtual environment
 
 ```bash
 python -m venv venv
 # Windows
 venv\Scripts\activate
-# macOS/Linux
+# macOS / Linux
 source venv/bin/activate
 ```
 
-### 3. Install Python Dependencies
+### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
+### 4. Configure environment variables
 
-Create a `.env` file in the root directory:
+Copy `.env.example` to `.env` and fill in your keys:
 
 ```env
 GROQ_API_KEY=your_groq_api_key_here
+
+# LangSmith (optional)
+LANGCHAIN_TRACING_V2=true
+LANGCHAIN_API_KEY=your_langsmith_api_key_here
+LANGCHAIN_PROJECT=swiftvisa
 ```
 
-### 5. Download Models (first time only)
+### 5. Download models (first time only)
 
 ```bash
-# Download and cache the cross-encoder reranker model
 python src/reranker.py
 ```
 
-The HuggingFace embedding model (`all-MiniLM-L6-v2`) is downloaded automatically on first run and cached in the `models/` folder.
+The `all-MiniLM-L6-v2` embedding model downloads automatically on first run and is cached in `models/`.
 
-### 6. Build the Vector Store (first time only)
+### 6. Build the vector store (first time only)
 
 ```bash
 python src/Dataloader.py
@@ -136,19 +135,19 @@ python src/Dataloader.py
 
 This loads `Data/visaType.json`, formats each visa entry, and saves the FAISS index to `Data/vectorestore/`.
 
-### 7. Run the Backend
+### 7. Run the backend
 
 ```bash
 python app.py
 ```
 
-API available at `http://127.0.0.1:8000`  
-Swagger docs at `http://127.0.0.1:8000/docs`
+- API: `http://127.0.0.1:8000`
+- Swagger docs: `http://127.0.0.1:8000/docs`
 
-### 8. Run the Frontend
+### 8. Run the frontend (optional)
 
 ```bash
-cd frontend
+cd Frontend/Visa
 npm install
 npm run dev
 ```
@@ -157,26 +156,59 @@ npm run dev
 
 ## 🔁 RAG Pipeline Details
 
-### Step 1 — Data Loading (`Dataloader.py`)
-Reads `visaType.json` and formats each visa entry into structured `LangChain Document` objects with fields including country, visa type, age range, education, language requirements, financial proof, work permissions, PR path, and official resources.
+| Step | File | What it does |
+|------|------|--------------|
+| 1. Data loading | `Dataloader.py` | Reads `visaType.json` and turns each entry into a LangChain `Document` with country, visa type, age range, education, language requirements, financial proof, work permissions, PR path, and official resources |
+| 2. Embeddings | `Embeddings.py` | Embeds documents with `all-MiniLM-L6-v2` and stores them in FAISS |
+| 3. Retrieval | `retriver.py` | `VisaRetriever` runs top-k similarity search for the user's query |
+| 4. Reranking | `reranker.py` | Cross-Encoder scores query-document pairs; scores are sigmoid-normalized and sorted in descending order |
+| 5. Prompting | `prompt_formater.py` | Combines the query and the top reranked document into the SwiftVisa prompt template |
+| 6. Generation | `llm_model.py` | Groq `llama-3.3-70b-versatile` produces the structured eligibility response |
+| 7. Logging | `logging.py` | Saves the query, response, and retrieved documents; keeps the last 20 entries |
 
-### Step 2 — Embeddings & Vector Store (`Embeddings.py`)
-Uses `sentence-transformers/all-MiniLM-L6-v2` (runs fully offline via cached models) to embed documents into FAISS for fast similarity search.
+---
 
-### Step 3 — Retrieval (`retriver.py`)
-`VisaRetriever` performs top-k similarity search on the FAISS index based on the user's query.
+## 📈 Observability & Evaluation with LangSmith
 
-### Step 4 — Reranking (`reranker.py`)
-`CrossEncoder (ms-marco-MiniLM-L-6-v2)` reranks retrieved documents using query-document pair scoring. Scores are normalized with sigmoid and sorted in descending order for highest relevance.
+SwiftVisa uses [LangSmith](https://smith.langchain.com/) to see what happens inside each request and to measure answer quality.
 
-### Step 5 — Prompt Formatting (`prompt_formater.py`)
-Combines the user query and the top reranked document into the `SwiftVisa` prompt template using LangChain's `PromptTemplate`.
+**Tracing.** With `LANGCHAIN_TRACING_V2=true`, each request is recorded as a trace covering retrieval, reranking, prompt formatting, and the LLM call, including inputs, outputs, latency, and token usage.
 
-### Step 6 — LLM Response (`llm_model.py`)
-Groq's `llama-3.3-70b-versatile` generates a structured eligibility response including status, reasons, next steps, missing information, and document citations.
+**Offline evaluation.** Run the pipeline against a fixed set of test profiles and score the outputs before shipping changes. This helps catch regressions when you change the embedding model, reranker, prompt, or LLM.
 
-### Step 7 — Logging (`logging.py`)
-Every query, response, and retrieved documents are logged to `logs/queries.json`. Only the last 20 entries are retained.
+**Online monitoring.** Live traces are tracked in the LangSmith project dashboard so you can watch latency, errors, and cost, and review real queries after deployment.
+
+### Evaluators (offline)
+
+Each test case is a user profile plus the expected eligibility verdict. Every case is run through the full pipeline and scored by these evaluators:
+
+| Evaluator | Type | What it checks |
+|-----------|------|----------------|
+| **Verdict correctness** | Code-based | Does the predicted status (Eligible / Not Eligible / Partially Eligible) match the expected label? |
+| **Retrieval relevance** | Code-based | Is the correct visa document in the top-k results before reranking, and at rank 1 after reranking? |
+| **Faithfulness (groundedness)** | LLM-as-judge | Is every reason in the answer supported by the retrieved visa document, with no invented requirements? |
+| **Completeness** | LLM-as-judge | Does the response list missing information and next steps when the profile is incomplete? |
+| **Citation presence** | Code-based | Does the answer include the country, visa type, and official resource of the retrieved document? |
+| **Format validity** | Code-based | Does the response contain all required sections (status, reason, next steps, missing information, citations)? |
+
+### Metrics
+
+| Metric | Stage | How it is measured |
+|--------|-------|--------------------|
+| Verdict accuracy | Offline | Share of test cases where the verdict matches the expected label |
+| Hit rate @ k | Offline | Share of cases where the correct document appears in the top-k retrieved results |
+| Top-1 accuracy after reranking | Offline | Share of cases where the correct document is ranked first by the Cross-Encoder |
+| Faithfulness score | Offline | Average judge score for groundedness across test cases |
+| Format validity rate | Offline and online | Share of responses containing every required section |
+| Latency (p50 / p95) | Online | End-to-end and per-stage time taken from LangSmith traces |
+| Token usage | Online | Input and output tokens per request, taken from traces |
+| Error rate | Online | Share of requests that fail or time out |
+
+### Running an evaluation
+
+Compare the results of each run in the LangSmith **Experiments** view to see whether a change to the embedding model, reranker, prompt, or LLM improved or hurt quality.
+
+<!-- Add your latest results here once you have run the evaluation, e.g. verdict accuracy, hit rate @ k, and p95 latency. Only list numbers you have measured. -->
 
 ---
 
@@ -208,26 +240,30 @@ Citations / Retrieved Documents:
 ## 🧰 Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|-------|------------|
 | Backend | FastAPI, Uvicorn |
-| LLM | Groq — Llama-3.3-70b-versatile |
-| Embeddings | HuggingFace — all-MiniLM-L6-v2 |
-| Vector Store | FAISS (LangChain) |
-| Reranker | CrossEncoder — ms-marco-MiniLM-L-6-v2 |
-| RAG Framework | LangChain |
+| LLM | Groq: Llama-3.3-70b-versatile |
+| Embeddings | Hugging Face: all-MiniLM-L6-v2 |
+| Vector store | FAISS (LangChain) |
+| Reranker | Cross-Encoder: ms-marco-MiniLM-L-6-v2 |
+| RAG framework | LangChain |
+| Observability & evaluation | LangSmith |
 | Frontend | React, React Router, Tailwind CSS |
 | Logging | JSON file-based logger |
 | Language | Python 3.12, JavaScript (JSX) |
 
 ---
 
-## 📄 License
+## ⚠️ Disclaimer
 
-This project is open source. Feel free to use and modify it.
+SwiftVisa gives informational guidance based on the policy data in `Data/visaType.json`. It is not legal or immigration advice. Always confirm requirements on the official government website before applying.
 
 ---
 
+## 📄 License
+
+Released under the [MIT License](LICENSE).
+
 ## 👨‍💻 Author
 
-**Rajashekhar Keesari**  
-[GitHub](https://github.com/rajashekharkeesari)
+**Rajashekhar Keesari**: [GitHub](https://github.com/rajashekharkeesari)
